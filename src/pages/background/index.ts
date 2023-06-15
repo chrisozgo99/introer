@@ -1,14 +1,29 @@
 import reloadOnUpdate from "virtual:reload-on-update-in-background-script";
+console.log("background loaded! Idk!");
 
 reloadOnUpdate("pages/background");
 
+chrome.runtime.onMessage.addListener((request) => {
+  if (request.action === "open_options_page") {
+    chrome.runtime.openOptionsPage();
+  }
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  console.log(tabId, changeInfo, tab);
+  if (changeInfo.status === "complete" && tab.url.includes("linkedin.com")) {
+    console.log("Condition met");
+    chrome.cookies.getAll({ domain: ".linkedin.com" }, (cookies) => {
+      console.log(cookies);
+      chrome.storage.local.set({ cookies });
+    });
+  }
+});
 /**
  * Extension reloading is necessary because the browser automatically caches the css.
  * If you do not use the css of the content script, please delete it.
  */
 reloadOnUpdate("pages/content/style.scss");
-
-console.log("background loaded");
 
 // import pupeeteer from "puppeteer";
 // import type { Browser, Page } from "puppeteer";

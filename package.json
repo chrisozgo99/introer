@@ -17,6 +17,7 @@
   },
   "type": "module",
   "dependencies": {
+    "puppeteer": "^20.7.1",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },

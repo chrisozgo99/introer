@@ -22,7 +22,7 @@ const manifest: chrome.runtime.ManifestV3 = {
   },
   content_scripts: [
     {
-      matches: ["*://mail.google.com/mail/*"],
+      matches: ["*://mail.google.com/mail/*", "*://*.linkedin.com/*"],
       js: ["src/pages/content/index.js"],
       // KEY for cache invalidation
       css: ["assets/css/contentStyle<KEY>.chunk.css"],
@@ -36,10 +36,13 @@ const manifest: chrome.runtime.ManifestV3 = {
         "icon-128.png",
         "icon-34.png",
         "introer_logo.png",
+        "src/pages/options/index.html",
       ],
       matches: ["*://*/*"],
     },
   ],
+  permissions: ["cookies", "storage"],
+  host_permissions: ["*://*.linkedin.com/"],
 };
 
 export default manifest;
