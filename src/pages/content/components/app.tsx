@@ -1,7 +1,8 @@
 import { useState } from "react";
+import EnterNames from "./enter-names/enter-names";
 
 export default function App() {
-  const [loggedIn] = useState(false);
+  const [loggedIn] = useState(true);
 
   if (!loggedIn) {
     return (
@@ -27,20 +28,5 @@ export default function App() {
     );
   }
 
-  return (
-    <div className="introer-popup">
-      <div className="introer-popup-header">
-        <div>
-          <h1>Who do you want to introduce?</h1>
-        </div>
-      </div>
-      <div className="introer-popup-body">
-        <div className="introer-popup-body-content">
-          <div className="introer-popup-body-content-input">
-            <input type="text" placeholder="Name" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <EnterNames />;
 }
