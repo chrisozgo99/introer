@@ -4,8 +4,12 @@ import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth } from "../background";
 import { accountAuth, accountLogout, accountProfile } from "@src/state/actions";
 import { connect } from "react-redux";
+// import { User } from "@src/types/user";
+import { AccountState } from "@src/state/reducers/account";
 
-const Options: React.FC = () => {
+const Options: React.FC = (props: AccountState) => {
+  console.log(props.user);
+
   const [user, setUser] = useState(undefined);
 
   const signIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -74,7 +78,8 @@ const Options: React.FC = () => {
   return <button onClick={signIn}>Sign In with Google</button>;
 };
 
-const mapStateToProps = (state) => Object.assign({}, state.account);
+const mapStateToProps = (state) =>
+  Object.assign({}, state.account as AccountState);
 
 const mapDispatchToProps = (dispatch) => ({
   accountAuth: (data) => {

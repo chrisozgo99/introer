@@ -1,10 +1,16 @@
+import { User } from "@src/types/user";
 import {
   ACCOUNT_AUTH,
   ACCOUNT_PROFILE,
   ACCOUNT_LOGOUT,
 } from "../actions/account";
 
-const initialState = {
+export interface AccountState {
+  token: string | null;
+  user: User | null;
+}
+
+const initialState: AccountState = {
   token: null,
   user: null,
 };
