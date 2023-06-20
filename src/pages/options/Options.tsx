@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import "@pages/options/Options.css";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth } from "../background";
+import { accountAuth, accountLogout, accountProfile } from "@src/state/actions";
+import { connect } from "react-redux";
 
 const Options: React.FC = () => {
   const [user, setUser] = useState(undefined);
@@ -72,4 +74,18 @@ const Options: React.FC = () => {
   return <button onClick={signIn}>Sign In with Google</button>;
 };
 
-export default Options;
+const mapStateToProps = (state) => Object.assign({}, state.account);
+
+const mapDispatchToProps = (dispatch) => ({
+  accountAuth: (data) => {
+    dispatch(accountAuth(data));
+  },
+  accountProfile: (data) => {
+    dispatch(accountProfile(data));
+  },
+  accountLogout: () => {
+    dispatch(accountLogout());
+  },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Options);

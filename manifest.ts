@@ -51,7 +51,7 @@ const manifest: chrome.runtime.ManifestV3 = {
       "523499253505-1v0h4tv3qsi37b6fkkm1e4fdjj8pu3k3.apps.googleusercontent.com",
     scopes: ["https://www.googleapis.com/auth/userinfo.email"],
   },
-  key: "ihiemfckfogoefcndohiolieeoegjloa",
+  key: "agpgpkgbchmgjcpkdpoidldaobdipock",
 };
 
 // const manifest: chrome.runtime.ManifestV2 = {

@@ -1,9 +1,9 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyDEUqCQkr-v7JGL4IX-zwOOwnBQYnikeL8",
-  authDomain: "introer-prod.firebaseapp.com",
-  projectId: "introer-prod",
-  storageBucket: "introer-prod.appspot.com",
-  messagingSenderId: "523499253505",
-  appId: "1:523499253505:web:4ca503ec335664494f7500",
-  measurementId: "G-FZB638HLD2",
+  apiKey: import.meta.env.VITE_APP_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_APP_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_APP_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_APP_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_APP_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_APP_ID,
+  measurementId: import.meta.env.VITE_APP_MEASUREMENT_ID,
 };
