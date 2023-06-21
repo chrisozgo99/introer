@@ -1,6 +1,10 @@
 import { combineReducers } from "redux";
 
-import account from "./account";
+import account, { AccountState } from "./account";
+
+export type RootState = {
+  account: AccountState;
+};
 
 const reducers = combineReducers({
   account,
