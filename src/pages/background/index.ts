@@ -7,11 +7,11 @@ import { firebaseConfig } from "@src/utils/firebase/config";
 
 reloadOnUpdate("pages/background");
 
-// chrome.runtime.onMessage.addListener((request) => {
-//   if (request.action === "open_options_page") {
-//     chrome.runtime.openOptionsPage();
-//   }
-// });
+chrome.runtime.onMessage.addListener((request) => {
+  if (request.action === "open_options_page") {
+    chrome.runtime.openOptionsPage();
+  }
+});
 
 // chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 //   console.log(tabId, changeInfo, tab);

@@ -20,6 +20,15 @@ const Options: React.FC = () => {
   const [linkedin, setLinkedin] = useState(user?.linkedin || "");
   const [intro, setIntro] = useState(user?.intro || "");
 
+  useEffect(() => {
+    if (!user) return;
+    setName(user?.name);
+    setTitle(user?.title);
+    setCompany(user?.company);
+    setLinkedin(user?.linkedin);
+    setIntro(user?.intro);
+  }, [user]);
+
   const signIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     chrome.identity.getAuthToken({ interactive: true }, (token) => {
@@ -142,20 +151,5 @@ const Options: React.FC = () => {
 
   return <button onClick={signIn}>Sign In with Google</button>;
 };
-
-// const mapStateToProps = (state) =>
-//   Object.assign({}, state.account as AccountState);
-
-// const mapDispatchToProps = (dispatch) => ({
-//   accountAuth: (data) => {
-//     dispatch(accountAuth(data));
-//   },
-//   accountProfile: (data) => {
-//     dispatch(accountProfile(data));
-//   },
-//   accountLogout: () => {
-//     dispatch(accountLogout());
-//   },
-// });
 
 export default Options;
