@@ -116,6 +116,13 @@ const render = () => {
       addIconToComposeWindow(info);
     });
 
+    chrome.runtime.onMessage.addListener((request) => {
+      if (request.action === "hello_world_result") {
+        const { result } = request;
+        console.log(result); // Access the result from the background script
+      }
+    });
+
     init(".introer-popup-container");
 
     // createRoot(info).render(<App />);
