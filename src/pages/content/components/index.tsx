@@ -11,12 +11,6 @@ import { Provider } from "react-redux";
 
 refreshOnUpdate("pages/content");
 
-// if (
-//   window.location.href === "https://mail.google.com/mail/u/0/#inbox?compose=new"
-// ) {
-//   addIconToComposeWindow();
-// }
-
 function addIconToComposeWindow(info: HTMLDivElement) {
   let tdAdded = false;
 
@@ -105,6 +99,27 @@ const render = () => {
   info.className = "introer-popup-container";
 
   body?.appendChild(info);
+
+  document.addEventListener("click", function (event) {
+    const targetElement = event.target as HTMLElement;
+    // Check if the clicked element is the div or a descendant of the div
+    //  or the td with class introer-button-td
+    if (
+      !info.contains(targetElement) &&
+      !targetElement.classList.contains("introer-button-td") &&
+      !targetElement.classList.contains("introer-icon")
+    ) {
+      // The clicked element is outside the div, change its style
+      info.style.display = "none";
+    }
+  });
+
+  window.addEventListener("hashchange", function () {
+    if (window.location.hash === "#inbox?compose=new") {
+      // Your code to handle compose mode goes here
+      addIconToComposeWindow(info);
+    }
+  });
 
   // Try to select the "Compose" button
   const composeButton = document.querySelector(".T-I.T-I-KE.L3");
