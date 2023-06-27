@@ -35,7 +35,8 @@ export default function EnterNames() {
           type="button"
           onClick={() => {
             chrome.runtime.sendMessage({
-              action: "hello_world",
+              action: "searchIntros",
+              name: linkedIn1,
             });
           }}
         >

@@ -19,19 +19,28 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
 
-chrome.runtime.onMessage.addListener((request) => {
+chrome.runtime.onMessage.addListener(async (request) => {
   if (request.action === "open_options_page") {
     chrome.runtime.openOptionsPage();
-  } else if (request.action === "hello_world") {
-    const helloWorld = httpsCallable(functions, "helloWorld");
-    helloWorld().then((result) => {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const activeTab = tabs[0];
-        chrome.tabs.sendMessage(activeTab.id, {
-          action: "hello_world_result",
-          result,
+  } else if (request.action === "searchIntros") {
+    console.log(request);
+    const searchIntros = httpsCallable(functions, "searchIntros");
+    searchIntros({
+      name: null,
+      url: request.name,
+    }).then((result) => {
+      console.log(result);
+      try {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          const activeTab = tabs[0];
+          chrome.tabs.sendMessage(activeTab.id, {
+            action: "searchIntrosResult",
+            result,
+          });
         });
-      });
+      } catch (error) {
+        console.log(error);
+      }
     });
   }
 });

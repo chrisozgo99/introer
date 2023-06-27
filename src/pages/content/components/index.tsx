@@ -114,6 +114,11 @@ const render = () => {
     }
   });
 
+  if (window.location.hash === "#inbox?compose=new") {
+    // Your code to handle compose mode goes here
+    addIconToComposeWindow(info);
+  }
+
   window.addEventListener("hashchange", function () {
     if (window.location.hash === "#inbox?compose=new") {
       // Your code to handle compose mode goes here
@@ -132,7 +137,7 @@ const render = () => {
     });
 
     chrome.runtime.onMessage.addListener((request) => {
-      if (request.action === "hello_world_result") {
+      if (request.action === "searchIntrosResult") {
         const { result } = request;
         console.log(result); // Access the result from the background script
       }
