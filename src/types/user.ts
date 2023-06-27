@@ -8,3 +8,11 @@ export interface User {
   linkedin?: string;
   intro?: string;
 }
+
+export type UserInfo = {
+  name: string;
+  title: string;
+  location: string;
+  profilePhoto: string;
+  linkedInUrl: string;
+};

@@ -7,3 +7,7 @@ h1.introer-header {
     color: #000;
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
+
+input.introer-popup-body-content-input {
+    width: 300px;
+}

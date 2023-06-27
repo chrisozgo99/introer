@@ -1,7 +1,11 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getFunctions, httpsCallable } from "firebase/functions";
+import {
+  HttpsCallableResult,
+  getFunctions,
+  httpsCallable,
+} from "firebase/functions";
 import reloadOnUpdate from "virtual:reload-on-update-in-background-script";
 import { firebaseConfig } from "@src/utils/firebase/config";
 
@@ -19,29 +23,38 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
 
-chrome.runtime.onMessage.addListener(async (request) => {
+chrome.runtime.onMessage.addListener(async (request, sender) => {
+  const tabIds = new Map();
   if (request.action === "open_options_page") {
     chrome.runtime.openOptionsPage();
   } else if (request.action === "searchIntros") {
+    tabIds.set(request, sender.tab.id);
     console.log(request);
     const searchIntros = httpsCallable(functions, "searchIntros");
-    searchIntros({
-      name: null,
-      url: request.name,
-    }).then((result) => {
-      console.log(result);
-      try {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          const activeTab = tabs[0];
-          chrome.tabs.sendMessage(activeTab.id, {
-            action: "searchIntrosResult",
-            result,
-          });
-        });
-      } catch (error) {
-        console.log(error);
-      }
-    });
+    const values = request.values;
+    let query1: Promise<HttpsCallableResult<unknown>>,
+      query2: Promise<HttpsCallableResult<unknown>>;
+    if (request.type === "url") {
+      query1 = searchIntros({ name: null, url: values[0] });
+      query2 = searchIntros({ name: null, url: values[1] });
+    } else if (request.type === "name") {
+      query1 = searchIntros({ name: values[0], url: null });
+      query2 = searchIntros({ name: values[1], url: null });
+    }
+    const results = await Promise.all([query1, query2]);
+    console.log(results);
+    try {
+      const tabId = tabIds.get(request);
+
+      chrome.tabs.sendMessage(tabId, {
+        action: "searchIntrosResult",
+        results,
+        user: auth.currentUser.displayName,
+        type: request.type,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 });
 

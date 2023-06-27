@@ -8,6 +8,7 @@ import { Store } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { ReduxedSetupOptions, setupReduxed } from "reduxed-chrome-storage";
 import { Provider } from "react-redux";
+import { UserInfo } from "@src/types/user";
 
 refreshOnUpdate("pages/content");
 
@@ -35,7 +36,10 @@ function addIconToComposeWindow(info: HTMLDivElement) {
           img.className = "introer-icon";
           img.alt = "Introer";
 
-          ReactDOM.render(<Icon introerIconUrl={introerIconUrl} />, newTd);
+          // If there is no icon, we want to ReactDOM.render the icon, else we don't want to render it
+          if (!targetNode.querySelector(".introer-icon")) {
+            ReactDOM.render(<Icon introerIconUrl={introerIconUrl} />, newTd);
+          }
 
           const buttonDiv = newTd.querySelector(".introer-embedded-button");
 
@@ -138,8 +142,81 @@ const render = () => {
 
     chrome.runtime.onMessage.addListener((request) => {
       if (request.action === "searchIntrosResult") {
-        const { result } = request;
-        console.log(result); // Access the result from the background script
+        const { results, user, type } = request;
+        console.log(results);
+
+        let person1: UserInfo, person2: UserInfo;
+        if (type === "name") {
+          person1 = results[0].data[0];
+          person2 = results[1].data[0];
+        } else if (type === "url") {
+          person1 = results[0].data;
+          person2 = results[1].data;
+        }
+
+        // Write an intro sentence based on the data received from the background script
+        const sentence1 = `${person2.name.split(" ")[0]}, <a href="${
+          person1.linkedInUrl
+        }" target="_blank">${person1.name.split(" ")[0]}</a> is a ${
+          person1.title
+        } based in ${person1.location
+          .split(" ")[0]
+          .replace(/[.,\\/#!$%\\^&\\*;:{}=\-_`~()]/g, "")}.`;
+
+        const sentence2 = `${person1.name.split(" ")[0]}, <a href=${
+          person2.linkedInUrl
+        } target="_blank">${person2.name.split(" ")[0]}</a> is a ${
+          person2.title
+        } based in ${person2.location
+          .split(" ")[0]
+          .replace(/[.,\\/#!$%\\^&\\*;:{}=\-_`~()]/g, "")}.`;
+
+        // Upon receiving the result, render the result in the div nested inside the div with class editable
+        const composeWindow = document.querySelector(".editable");
+        if (composeWindow instanceof HTMLElement) {
+          const innerHTML = composeWindow.innerHTML;
+          const prependHTML = `
+            <div>
+              Hi ${person1.name.split(" ")[0]} and ${
+            person2.name.split(" ")[0]
+          },
+            </div>
+            <div>
+              <br />
+            </div>
+            <font color="#E15A32">
+              [Write your intro here]
+            </font>
+            <div>
+              <br />
+            </div>
+            <div>
+              ${sentence1}
+            </div>
+            <div>
+              <br />
+            </div>
+            <div>
+              ${sentence2}
+            </div>
+            <div>
+              <br />
+            </div>
+            <div>
+              I'll let you two take it from here!
+            </div>
+            <div>
+              <br />
+            </div>
+            <div>
+              Best,
+            </div>
+            <div>
+              ${user.split(" ")[0]}
+            </div>
+          `;
+          composeWindow.innerHTML = prependHTML + innerHTML;
+        }
       }
     });
 
