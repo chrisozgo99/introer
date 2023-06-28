@@ -7,9 +7,11 @@ export default function EnterNames() {
   const [url, setUrl] = useState(true);
 
   return (
-    <div className="introer-popup-main">
+    <div className="introer-popup-main bg-slate-400">
       <div className="introer-header-div">
-        <h1 className="introer-header">Who do you want to introduce?</h1>
+        <h1 className="introer-header text-2xl font-bold mb-4 text-center text-black shadow-lg">
+          Who do you want to introduce?
+        </h1>
       </div>
       <div className="introer-popup-body">
         <div className="introer-popup-body-content">
@@ -22,7 +24,7 @@ export default function EnterNames() {
           </div>
           <div className="introer-popup-body-content-div">
             <input
-              className="introer-popup-body-content-input"
+              className="introer-popup-body-content-input w-[300px]"
               type="text"
               placeholder={
                 url
@@ -35,7 +37,7 @@ export default function EnterNames() {
           </div>
           <div className="introer-popup-body-content-div">
             <input
-              className="introer-popup-body-content-input"
+              className="introer-popup-body-content-input w-[300px]"
               type="text"
               placeholder={
                 url
