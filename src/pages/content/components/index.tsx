@@ -26,7 +26,7 @@ function addIconToComposeWindow(info: HTMLDivElement) {
         if (targetNode instanceof Node) {
           // Create a new <td> element
           const newTd = document.createElement("td");
-          newTd.className = "introer-button-td";
+          newTd.className = "introer-button-td m-0";
 
           const introerIconUrl = chrome.runtime.getURL("introer_logo.png");
 
@@ -100,7 +100,8 @@ const render = () => {
   const body = document.querySelector("body");
   const info: HTMLDivElement = document.createElement("div");
 
-  info.className = "introer-popup-container";
+  info.className =
+    "introer-popup-container hidden absolute z-50 right-[295px] bottom-[55px]";
 
   body?.appendChild(info);
 
