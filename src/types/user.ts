@@ -2,10 +2,10 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  photoURL?: string;
+  profilePhoto?: string;
   title?: string;
   company?: string;
-  linkedin?: string;
+  linkedInUrl?: string;
   intro?: string;
 }
 
@@ -16,3 +16,5 @@ export type UserInfo = {
   profilePhoto: string;
   linkedInUrl: string;
 };
+
+export type UserSearchResult = User[] | UserInfo[] | User | UserInfo | null;

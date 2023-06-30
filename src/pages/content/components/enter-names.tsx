@@ -14,19 +14,19 @@ export default function EnterNames() {
 
   const nameCompany = (
     <div>
-      <div className="introer-popup-body-content-div flex flex-row">
-        <div>
+      <div className="introer-popup-body-content-div flex flex-row w-full justify-evenly">
+        <div className="w-1/2">
           <input
-            className="introer-popup-body-content-input w-[150px]"
+            className="introer-popup-body-content-input"
             type="text"
             placeholder={"Ex: John Doe"}
             value={value1}
             onChange={(e) => setValue1(e.target.value)}
           />
         </div>
-        <div>
+        <div className="w-1/2">
           <input
-            className="introer-popup-body-content-input w-[150px]"
+            className="introer-popup-body-content-input"
             type="text"
             placeholder={"Ex: Microsoft"}
             value={company1}
@@ -34,19 +34,19 @@ export default function EnterNames() {
           />
         </div>
       </div>
-      <div className="introer-popup-body-content-div flex flex-row">
-        <div>
+      <div className="introer-popup-body-content-div flex flex-row w-full">
+        <div className="w-1/2">
           <input
-            className="introer-popup-body-content-input w-[150px]"
+            className="introer-popup-body-content-input"
             type="text"
             placeholder={"Ex: John Doe"}
             value={value2}
-            onChange={(e) => setValue1(e.target.value)}
+            onChange={(e) => setValue2(e.target.value)}
           />
         </div>
-        <div>
+        <div className="w-1/2">
           <input
-            className="introer-popup-body-content-input w-[150px]"
+            className="introer-popup-body-content-input"
             type="text"
             placeholder={"Ex: Google"}
             value={company2}
@@ -58,10 +58,10 @@ export default function EnterNames() {
   );
 
   const linkedInUrl = (
-    <div>
+    <div className="w-full">
       <div className="introer-popup-body-content-div">
         <input
-          className="introer-popup-body-content-input w-[300px]"
+          className="introer-popup-body-content-input w-full"
           type="text"
           placeholder={
             url ? "Ex: https://www.linkedin.com/in/john-doe/" : "Ex: John Doe"
@@ -72,7 +72,7 @@ export default function EnterNames() {
       </div>
       <div className="introer-popup-body-content-div">
         <input
-          className="introer-popup-body-content-input w-[300px]"
+          className="introer-popup-body-content-input w-full"
           type="text"
           placeholder={
             url ? "Ex: https://www.linkedin.com/in/jane-doe/" : "Ex: Jane Doe"
@@ -85,7 +85,7 @@ export default function EnterNames() {
   );
 
   return (
-    <div className="introer-popup-main bg-white">
+    <div className="introer-popup-main bg-white border-black border-">
       <div className="introer-header-div">
         <h1 className="introer-header text-2xl font-thin mb-4 text-center font-serif">
           Who do you want to introduce?
@@ -97,14 +97,21 @@ export default function EnterNames() {
             <div>Enter name and company</div>
             <label>
               <span className="slider round"></span>
-              <Switch onChange={() => setUrl(!url)} checked={url} />
+              <Switch
+                onChange={() => {
+                  setUrl(!url);
+                  setValue1("");
+                  setValue2("");
+                }}
+                checked={url}
+              />
             </label>
             <div>Enter LinkedIn URL</div>
           </div>
         </div>
         {url ? linkedInUrl : nameCompany}
       </div>
-      <div className="flex flex-row">
+      <div className="flex flex-row justify-evenly">
         <div>
           <button
             className="introer-popup-body-content-input-button"
@@ -128,7 +135,18 @@ export default function EnterNames() {
             onClick={() => {
               chrome.runtime.sendMessage({
                 action: "searchIntros",
-                values: [value1, value2],
+                values: url
+                  ? [value1, value2]
+                  : [
+                      {
+                        name: value1,
+                        company: company1,
+                      },
+                      {
+                        name: value2,
+                        company: company2,
+                      },
+                    ],
                 type: url ? "url" : "name",
               });
             }}

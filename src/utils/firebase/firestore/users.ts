@@ -31,7 +31,7 @@ async function getUser(user) {
         id: user.uid,
         email: user.email,
         name: user.displayName,
-        photoURL: user.photoURL,
+        profilePhoto: user.photoURL,
       };
 
       await setUser(user.uid, data);

@@ -1,13 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import {
-  HttpsCallableResult,
-  getFunctions,
-  httpsCallable,
-} from "firebase/functions";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import reloadOnUpdate from "virtual:reload-on-update-in-background-script";
 import { firebaseConfig } from "@src/utils/firebase/config";
+import { searchForUser } from "@src/utils/firebase/firestore/users";
 
 reloadOnUpdate("pages/background");
 
@@ -30,18 +27,63 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
   } else if (request.action === "searchIntros") {
     tabIds.set(request, sender.tab.id);
     console.log(request);
+    const search1 = searchForUser({
+      search:
+        request.type === "url" ? request.values[0] : request.values[0].name,
+      type: request.type === "url" ? "linkedin" : "name",
+    });
+    const search2 = searchForUser({
+      search:
+        request.type === "url" ? request.values[1] : request.values[1].name,
+      type: request.type === "url" ? "linkedin" : "name",
+    });
+
+    const promises = await Promise.all([search1, search2]);
+
+    console.log(promises);
+
+    let results = [];
     const searchIntros = httpsCallable(functions, "searchIntros");
-    const values = request.values;
-    let query1: Promise<HttpsCallableResult<unknown>>,
-      query2: Promise<HttpsCallableResult<unknown>>;
-    if (request.type === "url") {
-      query1 = searchIntros({ name: null, url: values[0] });
-      query2 = searchIntros({ name: null, url: values[1] });
-    } else if (request.type === "name") {
-      query1 = searchIntros({ name: values[0], url: null });
-      query2 = searchIntros({ name: values[1], url: null });
+
+    if (promises[0] && promises[1]) {
+      results = [promises[0], promises[1]];
+    } else if (promises[0]) {
+      const queryPromise = searchIntros(
+        request.type === "url"
+          ? { name: null, url: request.values[1] }
+          : { name: request.values[1].name, url: null }
+      );
+      const query = await Promise.all([queryPromise]);
+      console.log(query);
+      results = [promises[0], request.type === "url" ? query : query[0].data];
+    } else if (promises[1]) {
+      const queryPromise = searchIntros(
+        request.type === "url"
+          ? { name: null, url: request.values[0] }
+          : { name: request.values[0].name, url: null }
+      );
+      const query = await Promise.all([queryPromise]);
+      console.log(query);
+      results = [request.type === "url" ? query : query[0].data, promises[1]];
+    } else {
+      const queryPromise1 = searchIntros(
+        request.type === "url"
+          ? { name: null, url: request.values[0] }
+          : { name: request.values[0].name, url: null }
+      );
+      const queryPromise2 = searchIntros(
+        request.type === "url"
+          ? { name: null, url: request.values[1] }
+          : { name: request.values[1].name, url: null }
+      );
+      const query = await Promise.all([queryPromise1, queryPromise2]);
+      console.log(query);
+      results = [
+        request.type === "url" ? query[0] : query[0].data,
+        request.type === "url" ? query[1] : query[1].data,
+      ];
     }
-    const results = await Promise.all([query1, query2]);
+
     console.log(results);
     try {
       const tabId = tabIds.get(request);
@@ -49,22 +91,10 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
       chrome.tabs.sendMessage(tabId, {
         action: "searchIntrosResult",
         results,
-        user: auth.currentUser.displayName,
-        type: request.type,
+        search: request.type === "name",
       });
     } catch (error) {
       console.log(error);
     }
   }
 });
-
-// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-//   console.log(tabId, changeInfo, tab);
-//   if (changeInfo.status === "complete" && tab.url.includes("linkedin.com")) {
-//     console.log("Condition met");
-//     chrome.cookies.getAll({ domain: ".linkedin.com" }, (cookies) => {
-//       console.log(cookies);
-//       chrome.storage.local.set({ cookies });
-//     });
-//   }
-// });
