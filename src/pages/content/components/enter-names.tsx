@@ -1,15 +1,18 @@
+import { statusUpdate } from "@src/state/actions/status";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 
 export default function EnterNames() {
+  const dispatch = useDispatch();
   const [value1, setValue1] = useState("");
   const [value2, setValue2] = useState("");
 
   const [url, setUrl] = useState(true);
 
   return (
-    <div className="introer-popup-main bg-slate-400">
+    <div className="introer-popup-main bg-white">
       <div className="introer-header-div">
-        <h1 className="introer-header text-2xl font-bold mb-4 text-center text-black shadow-lg">
+        <h1 className="introer-header text-2xl mb-4 text-center font-serif">
           Who do you want to introduce?
         </h1>
       </div>
@@ -50,20 +53,38 @@ export default function EnterNames() {
           </div>
         </div>
       </div>
-      <div>
-        <button
-          className="introer-popup-body-content-input-button"
-          type="button"
-          onClick={() => {
-            chrome.runtime.sendMessage({
-              action: "searchIntros",
-              values: [value1, value2],
-              type: url ? "url" : "name",
-            });
-          }}
-        >
-          <span id="introer-popup-body-content-input-button">Next</span>
-        </button>
+      <div className="flex flex-row">
+        <div>
+          <button
+            className="introer-popup-body-content-input-button"
+            type="button"
+            onClick={() => {
+              dispatch(
+                statusUpdate({
+                  type: "STATUS_UPDATE",
+                  status: "makeIntro",
+                })
+              );
+            }}
+          >
+            <span id="introer-popup-body-content-input-button">Back</span>
+          </button>
+        </div>
+        <div>
+          <button
+            className="introer-popup-body-content-input-button"
+            type="button"
+            onClick={() => {
+              chrome.runtime.sendMessage({
+                action: "searchIntros",
+                values: [value1, value2],
+                type: url ? "url" : "name",
+              });
+            }}
+          >
+            <span id="introer-popup-body-content-input-button">Next</span>
+          </button>
+        </div>
       </div>
     </div>
   );

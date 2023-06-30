@@ -1,6 +1,15 @@
 import { db } from "@src/pages/background";
+import { Search } from "@src/types/search";
 import { User } from "@src/types/user";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  query,
+  collection,
+  where,
+} from "firebase/firestore";
 
 async function setUser(uid: string, data: User) {
   return await setDoc(doc(db, `users/${uid}`), data).catch((error) => {
@@ -34,4 +43,19 @@ async function getUser(user) {
   }
 }
 
-export { setUser, getUser };
+async function searchForUser(searchQuery: Search) {
+  const querySnapshot = await getDocs(
+    query(
+      collection(db, "users"),
+      where(searchQuery.type, "==", searchQuery.search)
+    )
+  );
+
+  if (querySnapshot.empty) {
+    return null;
+  } else {
+    return querySnapshot.docs[0].data();
+  }
+}
+
+export { setUser, getUser, searchForUser };

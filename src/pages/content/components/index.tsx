@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
-import App from "@src/pages/content/components/app";
+import App from "@src/pages/content/app";
 import refreshOnUpdate from "virtual:reload-on-update-in-view";
-import Icon from "./icon/icon";
+import Icon from "./icon";
 import ReactDOM from "react-dom";
 import reducers, { RootState } from "@src/state/reducers";
 import { Store } from "redux";
@@ -9,8 +9,11 @@ import { configureStore } from "@reduxjs/toolkit";
 import { ReduxedSetupOptions, setupReduxed } from "reduxed-chrome-storage";
 import { Provider } from "react-redux";
 import { UserInfo } from "@src/types/user";
+import { statusUpdate } from "@src/state/actions/status";
 
 refreshOnUpdate("pages/content");
+
+let store: Store<RootState>;
 
 function addIconToComposeWindow(info: HTMLDivElement) {
   let tdAdded = false;
@@ -66,10 +69,17 @@ function addIconToComposeWindow(info: HTMLDivElement) {
   observer.observe(document, config);
 }
 
-function init(container: string) {
-  const appContainer = document.querySelector(container);
+const render = () => {
+  const body = document.querySelector("body");
+  const info: HTMLDivElement = document.createElement("div");
+
+  info.className = "introer-popup-container hidden absolute z-50";
+
+  body?.appendChild(info);
+
+  const appContainer = document.querySelector(".introer-popup-container");
   if (!appContainer) {
-    throw new Error("Can not find " + container);
+    throw new Error("Can not find .introer-popup-container");
   }
   const root = createRoot(appContainer);
 
@@ -85,37 +95,57 @@ function init(container: string) {
 
   const instantiate = setupReduxed(storeCreatorContainer, options);
 
-  instantiate().then((store: Store) => {
-    const state: RootState = store.getState();
-    const { account } = state;
+  instantiate().then((storeInstance: Store) => {
+    store = storeInstance;
     root.render(
       <Provider store={store}>
-        <App account={account} />
+        <App store={store} />
       </Provider>
     );
   });
-}
-
-const render = () => {
-  const body = document.querySelector("body");
-  const info: HTMLDivElement = document.createElement("div");
-
-  info.className =
-    "introer-popup-container hidden absolute z-50 right-[295px] bottom-[55px]";
-
-  body?.appendChild(info);
 
   document.addEventListener("click", function (event) {
     const targetElement = event.target as HTMLElement;
-    // Check if the clicked element is the div or a descendant of the div
-    //  or the td with class introer-button-td
+
+    const element = document.querySelector(".introer-button-td");
+    const rect = element.getBoundingClientRect();
+
     if (
+      // Check if the clicked element is the div or a descendant of the div
+      //  or the td with class introer-button-td
       !info.contains(targetElement) &&
       !targetElement.classList.contains("introer-button-td") &&
       !targetElement.classList.contains("introer-icon")
     ) {
-      // The clicked element is outside the div, change its style
+      // The clicked element is outside the div, so we hide it
       info.style.display = "none";
+    } else if (
+      // If the clicked element is the icon, we want to toggle the popup's visibility
+      targetElement.classList.value.includes("introer-icon") ||
+      targetElement.classList.value.includes("introer-embedded-button") ||
+      targetElement.classList.value.includes("introer-surround-div")
+    ) {
+      store.dispatch(
+        statusUpdate({
+          type: "STATUS_UPDATE",
+          hidden: !store.getState().status.hidden,
+        })
+      );
+    } else if (targetElement.classList.value.includes("introer-make-intro")) {
+      store.dispatch(
+        statusUpdate({
+          type: "STATUS_UPDATE",
+          status: "choosePeople",
+        })
+      );
+    }
+
+    if (store.getState().status.status === "makeIntro") {
+      info.style.top = `${rect.top - 60}px`;
+      info.style.left = `${rect.left - 45}px`;
+    } else if (store.getState().status.status === "choosePeople") {
+      info.style.top = `${rect.top - 200}px`;
+      info.style.left = `${rect.left - 70}px`;
     }
   });
 
@@ -156,17 +186,17 @@ const render = () => {
         }
 
         // Write an intro sentence based on the data received from the background script
-        const sentence1 = `${person2.name.split(" ")[0]}, <a href="${
+        const sentence1 = `${person2.name.split(" ")[0]} – <a href="${
           person1.linkedInUrl
-        }" target="_blank">${person1.name.split(" ")[0]}</a> is a ${
+        }" target="_blank">${person1.name}</a> is a ${
           person1.title
         } based in ${person1.location
           .split(" ")[0]
           .replace(/[.,\\/#!$%\\^&\\*;:{}=\-_`~()]/g, "")}.`;
 
-        const sentence2 = `${person1.name.split(" ")[0]}, <a href=${
+        const sentence2 = `${person1.name.split(" ")[0]} – <a href=${
           person2.linkedInUrl
-        } target="_blank">${person2.name.split(" ")[0]}</a> is a ${
+        } target="_blank">${person2.name}</a> is a ${
           person2.title
         } based in ${person2.location
           .split(" ")[0]
@@ -220,10 +250,6 @@ const render = () => {
         }
       }
     });
-
-    init(".introer-popup-container");
-
-    // createRoot(info).render(<App />);
   }
 };
 
