@@ -37,7 +37,9 @@ function App(props: RootState) {
     return <div>Loading...</div>;
   }
 
-  return component;
+  return (
+    <div className={`${status.hidden ? "hidden" : "block"}`}>{component}</div>
+  );
 }
 
 const mapStateToProps = (state: RootState) => {

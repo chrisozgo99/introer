@@ -17,4 +17,6 @@ export type UserInfo = {
   linkedInUrl: string;
 };
 
+export type UserTypes = User | UserInfo;
+
 export type UserSearchResult = User[] | UserInfo[] | User | UserInfo | null;

@@ -15,7 +15,7 @@ refreshOnUpdate("pages/content");
 
 let store: Store<RootState>;
 
-function addIconToComposeWindow(info: HTMLDivElement) {
+function addIconToComposeWindow() {
   let tdAdded = false;
 
   const config = { childList: true, subtree: true };
@@ -44,16 +44,6 @@ function addIconToComposeWindow(info: HTMLDivElement) {
             ReactDOM.render(<Icon introerIconUrl={introerIconUrl} />, newTd);
           }
 
-          const buttonDiv = newTd.querySelector(".introer-embedded-button");
-
-          buttonDiv?.addEventListener("click", function () {
-            if (info.style.display === "block") {
-              info.style.display = "none";
-            } else {
-              info.style.display = "block";
-            }
-          });
-
           // Append the new <td> element to the target node
           targetNode.insertBefore(newTd, targetNode.children[1]);
 
@@ -73,7 +63,7 @@ const render = () => {
   const body = document.querySelector("body");
   const info: HTMLDivElement = document.createElement("div");
 
-  info.className = "introer-popup-container hidden absolute z-50";
+  info.className = "introer-popup-container absolute z-50";
 
   body?.appendChild(info);
 
@@ -118,7 +108,12 @@ const render = () => {
       !targetElement.classList.contains("introer-icon")
     ) {
       // The clicked element is outside the div, so we hide it
-      info.style.display = "none";
+      store.dispatch(
+        statusUpdate({
+          type: "STATUS_UPDATE",
+          hidden: !store.getState().status.hidden,
+        })
+      );
     } else if (
       // If the clicked element is the icon, we want to toggle the popup's visibility
       targetElement.classList.value.includes("introer-icon") ||
@@ -153,14 +148,12 @@ const render = () => {
   });
 
   if (window.location.hash === "#inbox?compose=new") {
-    // Your code to handle compose mode goes here
-    addIconToComposeWindow(info);
+    addIconToComposeWindow();
   }
 
   window.addEventListener("hashchange", function () {
     if (window.location.hash === "#inbox?compose=new") {
-      // Your code to handle compose mode goes here
-      addIconToComposeWindow(info);
+      addIconToComposeWindow();
     }
   });
 
@@ -171,7 +164,7 @@ const render = () => {
   if (composeButton instanceof Node) {
     // If it exists, add a click event listener to it
     composeButton.addEventListener("click", function () {
-      addIconToComposeWindow(info);
+      addIconToComposeWindow();
     });
 
     chrome.runtime.onMessage.addListener((request) => {
@@ -188,7 +181,11 @@ const render = () => {
           })
         );
       } else if (request.action === "searchIntrosResult" && !request.search) {
-        generateEmailHTML(request, store);
+        generateEmailHTML(
+          request.results[0],
+          request.results[1],
+          store.getState().account.user.name
+        );
       }
     });
   }

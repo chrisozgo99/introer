@@ -1,34 +1,46 @@
-import { UserInfo } from "@src/types/user";
-import { Store } from "redux";
+import { UserTypes } from "@src/types/user";
 
-export function generateEmailHTML(request, store: Store) {
-  const { results, type } = request;
-
-  let person1: UserInfo, person2: UserInfo;
-  if (type === "name") {
-    person1 = results[0].data[0];
-    person2 = results[1].data[0];
-  } else if (type === "url") {
-    person1 = results[0].data;
-    person2 = results[1].data;
+export function generateSentence(user: UserTypes) {
+  // User has written their own intro
+  if ("intro" in user) {
+    return user.intro;
+    // User has not written their own intro, but data is not coming from LinkedIn
+  } else if ("email" in user) {
+    return `${
+      user.linkedInUrl && user.linkedInUrl !== ""
+        ? `<a href="${user.linkedInUrl}" target="_blank">${user.name}</a>`
+        : user.name
+    } is a ${user.title ? user.title : "good friend of mine"}
+      }`;
+    // User has not written their own intro, and data is coming from LinkedIn
+  } else {
+    return `<a href="${user.linkedInUrl}" target="_blank">${
+      user.name
+    }</a> is a ${user.title} based in ${user.location
+      .split(" ")[0]
+      .replace(/[.,\\/#!$%\\^&\\*;:{}=\-_`~()]/g, "")}.`;
   }
+}
 
-  // Write an intro sentence based on the data received from the background script
-  const sentence1 = `${person2.name.split(" ")[0]} – <a href="${
-    person1.linkedInUrl
-  }" target="_blank">${person1.name}</a> is a ${
-    person1.title
-  } based in ${person1.location
-    .split(" ")[0]
-    .replace(/[.,\\/#!$%\\^&\\*;:{}=\-_`~()]/g, "")}.`;
+export function generateEmailHTML(
+  firstUser: UserTypes,
+  secondUser: UserTypes,
+  name: string
+) {
+  //   if (type === "name") {
+  //     firstUser = results[0].data[0];
+  //     secondUser = results[1].data[0];
+  //   } else if (type === "url") {
+  //     firstUser = results[0].data;
+  //     secondUser = results[1].data;
+  //   }
 
-  const sentence2 = `${person1.name.split(" ")[0]} – <a href=${
-    person2.linkedInUrl
-  } target="_blank">${person2.name}</a> is a ${
-    person2.title
-  } based in ${person2.location
-    .split(" ")[0]
-    .replace(/[.,\\/#!$%\\^&\\*;:{}=\-_`~()]/g, "")}.`;
+  const sentence1 = `${secondUser.name.split(" ")[0]} – ${generateSentence(
+    firstUser
+  )}`;
+  const sentence2 = `${firstUser.name.split(" ")[0]} – ${generateSentence(
+    secondUser
+  )}`;
 
   // Upon receiving the result, render the result in the div nested inside the div with class editable
   const composeWindow = document.querySelector(".editable");
@@ -36,8 +48,8 @@ export function generateEmailHTML(request, store: Store) {
     const innerHTML = composeWindow.innerHTML;
     const prependHTML = `
             <div>
-              Hi ${person1.name.split(" ")[0]} and ${
-      person2.name.split(" ")[0]
+              Hi ${firstUser.name.split(" ")[0]} and ${
+      secondUser.name.split(" ")[0]
     },
             </div>
             <div>
@@ -71,9 +83,15 @@ export function generateEmailHTML(request, store: Store) {
               Best,
             </div>
             <div>
-              ${store.getState().account.user.name.split(" ")[0]}
+              ${name.split(" ")[0]}
             </div>
           `;
     composeWindow.innerHTML = prependHTML + innerHTML;
+
+    // Add subject line
+    const subjectLine = document.querySelector(".aoD.az6 input");
+    if (subjectLine instanceof HTMLInputElement) {
+      subjectLine.value = `Connecting ${firstUser.name} & ${secondUser.name}`;
+    }
   }
 }
