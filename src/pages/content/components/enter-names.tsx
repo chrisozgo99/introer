@@ -1,7 +1,9 @@
-import { statusUpdate } from "@src/state/actions/status";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import Lottie from "lottie-react";
 import Switch from "react-switch";
+import { statusUpdate } from "@src/state/actions/status";
+import searching from "@src/assets/lottie/searching.json";
 
 export default function EnterNames() {
   const dispatch = useDispatch();
@@ -9,6 +11,9 @@ export default function EnterNames() {
   const [company2, setCompany2] = useState("");
   const [value1, setValue1] = useState("");
   const [value2, setValue2] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  console.log(loading);
 
   const [url, setUrl] = useState(false);
 
@@ -84,8 +89,19 @@ export default function EnterNames() {
     </div>
   );
 
+  const lottie = <Lottie animationData={searching} loop={true} />;
+
+  if (loading) {
+    return (
+      <div className="introer-popup-main bg-white border-black w-40 h-40">
+        <div className="text-center">Locating your connections</div>
+        {lottie}
+      </div>
+    );
+  }
+
   return (
-    <div className="introer-popup-main bg-white border-black border-">
+    <div className="introer-popup-main bg-white border-black">
       <div className="introer-header-div">
         <h1 className="introer-header text-2xl font-thin mb-4 text-center font-serif">
           Who do you want to introduce?
@@ -128,11 +144,12 @@ export default function EnterNames() {
             <span id="introer-popup-body-content-input-button">Back</span>
           </button>
         </div>
-        <div>
+        <div className="introer-no-close">
           <button
-            className="introer-popup-body-content-input-button"
+            className="introer-popup-body-content-input-button introer-no-close"
             type="button"
             onClick={() => {
+              setLoading(!loading);
               chrome.runtime.sendMessage({
                 action: "searchIntros",
                 values: url
@@ -151,7 +168,12 @@ export default function EnterNames() {
               });
             }}
           >
-            <span id="introer-popup-body-content-input-button">Next</span>
+            <span
+              className="introer-no-close"
+              id="introer-popup-body-content-input-button"
+            >
+              Next
+            </span>
           </button>
         </div>
       </div>

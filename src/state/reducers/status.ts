@@ -13,13 +13,13 @@ export interface StatusState {
   };
 }
 
-const initialState: StatusState = {
+export const initialStatusState: StatusState = {
   status: "makeIntro",
   loading: false,
   hidden: true,
 };
 
-export default function status(state = initialState, action) {
+export default function status(state = initialStatusState, action) {
   const { type, data } = action;
   switch (type) {
     case STATUS_LOADING:

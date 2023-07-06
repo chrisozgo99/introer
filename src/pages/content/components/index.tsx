@@ -6,7 +6,7 @@ import ReactDOM from "react-dom";
 import reducers, { RootState } from "@src/state/reducers";
 import { Store } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
-import { ReduxedSetupOptions, setupReduxed } from "reduxed-chrome-storage";
+import { setupReduxed } from "reduxed-chrome-storage";
 import { Provider } from "react-redux";
 import { statusUpdate } from "@src/state/actions/status";
 import { generateEmailHTML } from "@src/utils/email";
@@ -59,7 +59,7 @@ function addIconToComposeWindow() {
   observer.observe(document, config);
 }
 
-const render = () => {
+const render = async () => {
   const body = document.querySelector("body");
   const info: HTMLDivElement = document.createElement("div");
 
@@ -79,11 +79,7 @@ const render = () => {
       preloadedState,
     });
 
-  const options: ReduxedSetupOptions = {
-    namespace: "chrome",
-  };
-
-  const instantiate = setupReduxed(storeCreatorContainer, options);
+  const instantiate = setupReduxed(storeCreatorContainer);
 
   instantiate().then((storeInstance: Store) => {
     store = storeInstance;
@@ -99,42 +95,44 @@ const render = () => {
 
     const element = document.querySelector(".introer-button-td");
     const rect = element.getBoundingClientRect();
-
-    if (
-      // Check if the clicked element is the div or a descendant of the div
-      //  or the td with class introer-button-td
-      !info.contains(targetElement) &&
-      !targetElement.classList.contains("introer-button-td") &&
-      !targetElement.classList.contains("introer-icon")
-    ) {
-      // The clicked element is outside the div, so we hide it
-      store.dispatch(
-        statusUpdate({
-          type: "STATUS_UPDATE",
-          hidden: !store.getState().status.hidden,
-        })
-      );
-    } else if (
-      // If the clicked element is the icon, we want to toggle the popup's visibility
-      targetElement.classList.value.includes("introer-icon") ||
-      targetElement.classList.value.includes("introer-embedded-button") ||
-      targetElement.classList.value.includes("introer-surround-div")
-    ) {
-      store.dispatch(
-        statusUpdate({
-          type: "STATUS_UPDATE",
-          hidden: !store.getState().status.hidden,
-        })
-      );
-    } else if (targetElement.classList.value.includes("introer-make-intro")) {
-      store.dispatch(
-        statusUpdate({
-          type: "STATUS_UPDATE",
-          status: "choosePeople",
-        })
-      );
+    console.log(targetElement.classList);
+    if (!targetElement.classList.value.includes("introer-no-close")) {
+      console.log("can be closed");
+      if (
+        // Check if the clicked element is the div or a descendant of the div
+        //  or the td with class introer-button-td
+        !info.contains(targetElement) &&
+        !targetElement.classList.contains("introer-button-td") &&
+        !targetElement.classList.contains("introer-icon")
+      ) {
+        // The clicked element is outside the div, so we hide it
+        store.dispatch(
+          statusUpdate({
+            type: "STATUS_UPDATE",
+            hidden: true,
+          })
+        );
+      } else if (
+        // If the clicked element is the icon, we want to toggle the popup's visibility
+        targetElement.classList.value.includes("introer-icon") ||
+        targetElement.classList.value.includes("introer-embedded-button") ||
+        targetElement.classList.value.includes("introer-surround-div")
+      ) {
+        store.dispatch(
+          statusUpdate({
+            type: "STATUS_UPDATE",
+            hidden: !store.getState().status.hidden,
+          })
+        );
+      } else if (targetElement.classList.value.includes("introer-make-intro")) {
+        store.dispatch(
+          statusUpdate({
+            type: "STATUS_UPDATE",
+            status: "choosePeople",
+          })
+        );
+      }
     }
-
     if (store.getState().status.status === "makeIntro") {
       info.style.top = `${rect.top - 60}px`;
       info.style.left = `${rect.left - 45}px`;

@@ -12,8 +12,6 @@ function App(props: RootState) {
   const { account, status } = props;
   const { user } = account;
 
-  console.log(status);
-
   useEffect(() => {
     if (status.status === "makeIntro") {
       setComponent(<MakeIntro />);
@@ -30,7 +28,11 @@ function App(props: RootState) {
   }, [status.status]);
 
   if (!user) {
-    return <LogIn />;
+    return (
+      <div className={`${status.hidden ? "hidden" : "block"}`}>
+        <LogIn />
+      </div>
+    );
   }
 
   if (status.loading === true) {

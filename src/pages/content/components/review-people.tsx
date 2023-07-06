@@ -134,6 +134,7 @@ export default function ReviewPeople(props: ReviewPeopleProps) {
                   dispatch(
                     statusUpdate({
                       type: "STATUS_UPDATE",
+                      status: "makeIntro",
                       hidden: true,
                     })
                   );

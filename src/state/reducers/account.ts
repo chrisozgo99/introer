@@ -10,12 +10,12 @@ export interface AccountState {
   user: User | null;
 }
 
-const initialState: AccountState = {
+const initialAccountState: AccountState = {
   token: null,
   user: null,
 };
 
-export default function account(state = initialState, action) {
+export default function account(state = initialAccountState, action) {
   const { type, data } = action;
   switch (type) {
     case ACCOUNT_AUTH:
