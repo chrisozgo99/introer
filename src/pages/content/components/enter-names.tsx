@@ -13,12 +13,14 @@ export default function EnterNames() {
   const [value2, setValue2] = useState("");
   const [loading, setLoading] = useState(false);
 
-  console.log(loading);
-
   const [url, setUrl] = useState(false);
 
   const nameCompany = (
     <div>
+      <div className="introer-popup-body-content-div flex flex-row w-full justify-evenly">
+        <div className="w-1/2">Name</div>
+        <div className="w-1/2">(Optional) Company</div>
+      </div>
       <div className="introer-popup-body-content-div flex flex-row w-full justify-evenly">
         <div className="w-1/2">
           <input
@@ -95,6 +97,17 @@ export default function EnterNames() {
     return (
       <div className="introer-popup-main bg-white border-black w-40 h-40">
         <div className="text-center">Locating your connections</div>
+        <div>
+          <button
+            className="introer-popup-body-content-input-button"
+            type="button"
+            onClick={() => {
+              setLoading(!loading);
+            }}
+          >
+            <span id="introer-popup-body-content-input-button">Cancel</span>
+          </button>
+        </div>
         {lottie}
       </div>
     );

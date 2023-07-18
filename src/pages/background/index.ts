@@ -4,7 +4,8 @@ import { getFirestore } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import reloadOnUpdate from "virtual:reload-on-update-in-background-script";
 import { firebaseConfig } from "@src/utils/firebase/config";
-import { searchForUser } from "@src/utils/firebase/firestore/users";
+import { User, UserSearchResult } from "@src/types/user";
+import { handleSearch } from "@src/utils/firebase/firestore/users";
 
 reloadOnUpdate("pages/background");
 
@@ -26,72 +27,54 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
     chrome.runtime.openOptionsPage();
   } else if (request.action === "searchIntros") {
     tabIds.set(request, sender.tab.id);
+
     console.log(request);
-    const search1 = searchForUser({
-      search:
-        request.type === "url" ? request.values[0] : request.values[0].name,
-      type: request.type === "url" ? "linkedin" : "name",
-    });
-    const search2 = searchForUser({
-      search:
-        request.type === "url" ? request.values[1] : request.values[1].name,
-      type: request.type === "url" ? "linkedin" : "name",
-    });
 
-    const promises = await Promise.all([search1, search2]);
+    let results: [UserSearchResult, UserSearchResult] = [null, null];
 
-    console.log(promises);
+    const dbSearch: Promise<[User[] | null, User[] | null]> = handleSearch(
+      request.type,
+      request.values
+    );
 
-    let results = [];
-    const searchIntros = httpsCallable(functions, "searchIntros");
+    const passParams = httpsCallable(functions, "passParams");
+    const res = passParams({
+      type: request.type,
+      values: request.values,
+    })
+      .then((res: { data: { data: [UserSearchResult, UserSearchResult] } }) => {
+        return res.data.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return [[], []];
+      });
 
-    if (promises[0] && promises[1]) {
-      results = [promises[0], promises[1]];
-    } else if (promises[0]) {
-      const queryPromise = searchIntros(
-        request.type === "url"
-          ? { name: null, url: request.values[1] }
-          : { name: request.values[1].name, url: null }
-      );
-      const query = await Promise.all([queryPromise]);
-      console.log(query);
-      results = [promises[0], request.type === "url" ? query : query[0].data];
-    } else if (promises[1]) {
-      const queryPromise = searchIntros(
-        request.type === "url"
-          ? { name: null, url: request.values[0] }
-          : { name: request.values[0].name, url: null }
-      );
-      const query = await Promise.all([queryPromise]);
-      console.log(query);
-      results = [request.type === "url" ? query : query[0].data, promises[1]];
+    const dbQuery = await Promise.resolve(dbSearch);
+
+    if (dbQuery[0] === null || dbQuery[1] === null) {
+      console.log("scraping");
+      const scrapingQuery = await Promise.resolve(res);
+      if (dbQuery[0] === null && dbQuery[1] === null) {
+        results = [scrapingQuery[0], scrapingQuery[1]];
+      } else if (dbQuery[0] === null) {
+        results = [scrapingQuery[0], dbQuery[1]];
+      } else if (dbQuery[1] === null) {
+        results = [dbQuery[0], scrapingQuery[1]];
+      }
     } else {
-      const queryPromise1 = searchIntros(
-        request.type === "url"
-          ? { name: null, url: request.values[0] }
-          : { name: request.values[0].name, url: null }
-      );
-      const queryPromise2 = searchIntros(
-        request.type === "url"
-          ? { name: null, url: request.values[1] }
-          : { name: request.values[1].name, url: null }
-      );
-      const query = await Promise.all([queryPromise1, queryPromise2]);
-      console.log(query);
-      results = [
-        request.type === "url" ? query[0] : query[0].data,
-        request.type === "url" ? query[1] : query[1].data,
-      ];
+      results = [dbQuery[0], dbQuery[1]];
     }
 
     console.log(results);
-    try {
-      const tabId = tabIds.get(request);
 
+    const tabId = tabIds.get(request);
+
+    try {
       chrome.tabs.sendMessage(tabId, {
         action: "searchIntrosResult",
-        results,
         search: request.type === "name",
+        results: [results[0], results[1]],
       });
     } catch (error) {
       console.log(error);

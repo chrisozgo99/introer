@@ -6,10 +6,11 @@ import ReactDOM from "react-dom";
 import reducers, { RootState } from "@src/state/reducers";
 import { Store } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
-import { setupReduxed } from "reduxed-chrome-storage";
+import { ExtendedStore, setupReduxed } from "reduxed-chrome-storage";
 import { Provider } from "react-redux";
 import { statusUpdate } from "@src/state/actions/status";
 import { generateEmailHTML } from "@src/utils/email";
+import { StatusState, initialStatusState } from "@src/state/reducers/status";
 
 refreshOnUpdate("pages/content");
 
@@ -73,31 +74,49 @@ const render = async () => {
   }
   const root = createRoot(appContainer);
 
-  const storeCreatorContainer = (preloadedState: unknown) =>
-    configureStore({
-      reducer: reducers,
-      preloadedState,
+  let instantiate: (resetState?: unknown) => Promise<ExtendedStore>;
+
+  const initializeStore = async () => {
+    const createReduxStore = async (preloadedState?: StatusState) => {
+      const account = await chrome.storage.local.get().then((oldState) => {
+        return oldState.reduxed[2].account as RootState["account"];
+      });
+
+      await chrome.storage.local.clear();
+
+      return configureStore({
+        reducer: reducers,
+        preloadedState: {
+          account: account,
+          status: preloadedState,
+        },
+      });
+    };
+
+    const storeCreatorContainer = await createReduxStore(initialStatusState);
+    instantiate = setupReduxed(() => storeCreatorContainer);
+  };
+
+  await initializeStore();
+
+  if (instantiate) {
+    instantiate().then((storeInstance: Store) => {
+      store = storeInstance;
+      console.log(store.getState());
+      root.render(
+        <Provider store={store}>
+          <App store={store} />
+        </Provider>
+      );
     });
-
-  const instantiate = setupReduxed(storeCreatorContainer);
-
-  instantiate().then((storeInstance: Store) => {
-    store = storeInstance;
-    root.render(
-      <Provider store={store}>
-        <App store={store} />
-      </Provider>
-    );
-  });
+  }
 
   document.addEventListener("click", function (event) {
     const targetElement = event.target as HTMLElement;
 
     const element = document.querySelector(".introer-button-td");
     const rect = element.getBoundingClientRect();
-    console.log(targetElement.classList);
     if (!targetElement.classList.value.includes("introer-no-close")) {
-      console.log("can be closed");
       if (
         // Check if the clicked element is the div or a descendant of the div
         //  or the td with class introer-button-td
@@ -165,27 +184,40 @@ const render = async () => {
       addIconToComposeWindow();
     });
 
-    chrome.runtime.onMessage.addListener((request) => {
-      console.log(request.results);
-      if (request.action === "searchIntrosResult" && request.search) {
-        store.dispatch(
-          statusUpdate({
-            type: "STATUS_UPDATE",
-            status: "reviewPeople",
-            searchResults: {
-              user1: request.results[0],
-              user2: request.results[1],
-            },
-          })
-        );
-      } else if (request.action === "searchIntrosResult" && !request.search) {
-        generateEmailHTML(
-          request.results[0],
-          request.results[1],
-          store.getState().account.user.name
-        );
-      }
-    });
+    try {
+      chrome.runtime.onMessage.addListener((request) => {
+        console.log(request.results);
+        if (request.action === "searchIntrosResult" && request.search) {
+          store.dispatch(
+            statusUpdate({
+              type: "STATUS_UPDATE",
+              status: "reviewPeople",
+              searchResults: {
+                user1: request.results[0],
+                user2: request.results[1],
+              },
+            })
+          );
+        } else if (request.action === "searchIntrosResult" && !request.search) {
+          generateEmailHTML(
+            request.results[0],
+            request.results[1],
+            store.getState().account.user.name
+          );
+          store.dispatch(
+            statusUpdate({
+              type: "STATUS_UPDATE",
+              status: "makeIntro",
+              hidden: true,
+            })
+          );
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
+    console.log("successfully added event listener to compose button");
   }
 };
 

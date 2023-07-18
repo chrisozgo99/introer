@@ -10,8 +10,7 @@ export function generateSentence(user: UserTypes) {
       user.linkedInUrl && user.linkedInUrl !== ""
         ? `<a href="${user.linkedInUrl}" target="_blank">${user.name}</a>`
         : user.name
-    } is a ${user.title ? user.title : "good friend of mine"}
-      }`;
+    } is a ${user.title ? user.title : "good friend of mine"}`;
     // User has not written their own intro, and data is coming from LinkedIn
   } else {
     return `<a href="${user.linkedInUrl}" target="_blank">${

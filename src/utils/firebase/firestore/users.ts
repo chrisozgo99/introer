@@ -54,8 +54,58 @@ async function searchForUser(searchQuery: Search) {
   if (querySnapshot.empty) {
     return null;
   } else {
-    return querySnapshot.docs[0].data();
+    const users: User[] = [];
+    querySnapshot.forEach((doc) => {
+      users.push(doc.data() as User);
+    });
+    return users;
   }
 }
 
-export { setUser, getUser, searchForUser };
+async function handleSearch(
+  type: "url" | "name",
+  query: [
+    { name: string; company: string } | string,
+    { name: string; company: string } | string
+  ]
+): Promise<[User[] | null, User[] | null]> {
+  let results: [User[] | null, User[] | null] = [null, null];
+  let search1: Promise<User[]> | null;
+  let search2: Promise<User[]> | null;
+
+  if (type === "url") {
+    search1 = searchForUser({
+      search: query[0] as string,
+      type: "linkedin",
+    });
+    search2 = searchForUser({
+      search: query[1] as string,
+      type: "linkedin",
+    });
+  } else if (type === "name") {
+    search1 = searchForUser({
+      search: (query[0] as { name: string; company: string }).name,
+      type: "name",
+    });
+    search2 = searchForUser({
+      search: (query[1] as { name: string; company: string }).name,
+      type: "name",
+    });
+  }
+
+  const res = await Promise.all([search1, search2]);
+
+  if (res[0] && res[1]) {
+    results = [res[0], res[1]];
+  } else if (res[0]) {
+    results = [res[0], null];
+  } else if (res[1]) {
+    results = [null, res[1]];
+  } else {
+    results = [null, null];
+  }
+
+  return results;
+}
+
+export { setUser, getUser, searchForUser, handleSearch };
