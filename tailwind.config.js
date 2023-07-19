@@ -5,7 +5,11 @@ export default {
     preflight: false,
   },
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: "#E15A32",
+      },
+    },
   },
   plugins: [],
 };

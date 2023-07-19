@@ -17,7 +17,7 @@ const Options: React.FC = () => {
   const [name, setName] = useState(user?.name || "");
   const [title, setTitle] = useState(user?.title || "");
   const [company, setCompany] = useState(user?.company || "");
-  const [linkedin, setLinkedin] = useState(user?.linkedin || "");
+  const [linkedin, setLinkedin] = useState(user?.linkedInUrl || "");
   const [intro, setIntro] = useState(user?.intro || "");
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const Options: React.FC = () => {
     setName(user?.name);
     setTitle(user?.title);
     setCompany(user?.company);
-    setLinkedin(user?.linkedin);
+    setLinkedin(user?.linkedInUrl);
     setIntro(user?.intro);
   }, [user]);
 
@@ -131,8 +131,8 @@ const Options: React.FC = () => {
                 if (title && title !== user.title) updatedUser["title"] = title;
                 if (company && company !== user.company)
                   updatedUser["company"] = company;
-                if (linkedin && linkedin !== user.linkedin)
-                  updatedUser["linkedin"] = linkedin;
+                if (linkedin && linkedin !== user.linkedInUrl)
+                  updatedUser["linkedInUrl"] = linkedin;
                 if (intro && intro !== user.intro) updatedUser["intro"] = intro;
                 e.preventDefault();
                 await setUser(user.id, {

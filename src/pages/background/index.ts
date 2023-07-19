@@ -1,13 +1,11 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import {
-  HttpsCallableResult,
-  getFunctions,
-  httpsCallable,
-} from "firebase/functions";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import reloadOnUpdate from "virtual:reload-on-update-in-background-script";
 import { firebaseConfig } from "@src/utils/firebase/config";
+import { User, UserSearchResult } from "@src/types/user";
+import { handleSearch } from "@src/utils/firebase/firestore/users";
 
 reloadOnUpdate("pages/background");
 
@@ -29,42 +27,57 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
     chrome.runtime.openOptionsPage();
   } else if (request.action === "searchIntros") {
     tabIds.set(request, sender.tab.id);
-    console.log(request);
-    const searchIntros = httpsCallable(functions, "searchIntros");
-    const values = request.values;
-    let query1: Promise<HttpsCallableResult<unknown>>,
-      query2: Promise<HttpsCallableResult<unknown>>;
-    if (request.type === "url") {
-      query1 = searchIntros({ name: null, url: values[0] });
-      query2 = searchIntros({ name: null, url: values[1] });
-    } else if (request.type === "name") {
-      query1 = searchIntros({ name: values[0], url: null });
-      query2 = searchIntros({ name: values[1], url: null });
-    }
-    const results = await Promise.all([query1, query2]);
-    console.log(results);
-    try {
-      const tabId = tabIds.get(request);
 
+    console.log(request);
+
+    let results: [UserSearchResult, UserSearchResult] = [null, null];
+
+    const dbSearch: Promise<[User[] | null, User[] | null]> = handleSearch(
+      request.type,
+      request.values
+    );
+
+    const passParams = httpsCallable(functions, "passParams");
+    const res = passParams({
+      type: request.type,
+      values: request.values,
+    })
+      .then((res: { data: { data: [UserSearchResult, UserSearchResult] } }) => {
+        return res.data.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return [[], []];
+      });
+
+    const dbQuery = await Promise.resolve(dbSearch);
+
+    if (dbQuery[0] === null || dbQuery[1] === null) {
+      console.log("scraping");
+      const scrapingQuery = await Promise.resolve(res);
+      if (dbQuery[0] === null && dbQuery[1] === null) {
+        results = [scrapingQuery[0], scrapingQuery[1]];
+      } else if (dbQuery[0] === null) {
+        results = [scrapingQuery[0], dbQuery[1]];
+      } else if (dbQuery[1] === null) {
+        results = [dbQuery[0], scrapingQuery[1]];
+      }
+    } else {
+      results = [dbQuery[0], dbQuery[1]];
+    }
+
+    console.log(results);
+
+    const tabId = tabIds.get(request);
+
+    try {
       chrome.tabs.sendMessage(tabId, {
         action: "searchIntrosResult",
-        results,
-        user: auth.currentUser.displayName,
-        type: request.type,
+        search: request.type === "name",
+        results: [results[0], results[1]],
       });
     } catch (error) {
       console.log(error);
     }
   }
 });
-
-// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-//   console.log(tabId, changeInfo, tab);
-//   if (changeInfo.status === "complete" && tab.url.includes("linkedin.com")) {
-//     console.log("Condition met");
-//     chrome.cookies.getAll({ domain: ".linkedin.com" }, (cookies) => {
-//       console.log(cookies);
-//       chrome.storage.local.set({ cookies });
-//     });
-//   }
-// });
