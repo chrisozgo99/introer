@@ -6,17 +6,15 @@ const Popup = () => {
   return (
     <div className="App">
       <header className="App-header">
+        <h1 className="App-title">INTROER</h1>
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/pages/popup/Popup.tsx</code> and save to reload.
-        </p>
         <a
           className="App-link"
-          href="https://reactjs.org"
+          href="chrome-extension://ihmoleioejjjdbdmnbngkbanlgoodbcl/src/pages/options/index.html"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React!
+          Settings
         </a>
       </header>
     </div>

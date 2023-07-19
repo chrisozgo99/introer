@@ -26,14 +26,6 @@ export function generateEmailHTML(
   secondUser: UserTypes,
   name: string
 ) {
-  //   if (type === "name") {
-  //     firstUser = results[0].data[0];
-  //     secondUser = results[1].data[0];
-  //   } else if (type === "url") {
-  //     firstUser = results[0].data;
-  //     secondUser = results[1].data;
-  //   }
-
   const sentence1 = `${secondUser.name.split(" ")[0]} – ${generateSentence(
     firstUser
   )}`;
