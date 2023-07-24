@@ -54,7 +54,6 @@ const Options: React.FC = () => {
             })
           );
           console.log(res);
-          console.log("signed in!");
         })
         .catch((err) => {
           alert(`SSO ended with an error: ${err}`);

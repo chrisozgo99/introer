@@ -102,7 +102,6 @@ const render = async () => {
   if (instantiate) {
     instantiate().then((storeInstance: Store) => {
       store = storeInstance;
-      console.log(store.getState());
       root.render(
         <Provider store={store}>
           <App store={store} />
@@ -216,8 +215,6 @@ const render = async () => {
     } catch (error) {
       console.log(error);
     }
-
-    console.log("successfully added event listener to compose button");
   }
 };
 
