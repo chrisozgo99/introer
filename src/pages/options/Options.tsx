@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import "@pages/options/Options.css";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth } from "../background";
 import { accountAuth, accountLogout, accountProfile } from "@src/state/actions";
@@ -55,7 +54,6 @@ const Options: React.FC = () => {
             })
           );
           console.log(res);
-          console.log("signed in!");
         })
         .catch((err) => {
           alert(`SSO ended with an error: ${err}`);
@@ -88,42 +86,68 @@ const Options: React.FC = () => {
 
   if (user != null)
     return (
-      <div>
-        <h1>Signed in as {user.name}.</h1>
+      <div className="w-full">
+        <h1 className="text-center">Signed in as {user.name}</h1>
+        <div className="flex justify-center">
+          <button onClick={signOut}>Sign Out</button>
+        </div>
+
         <div>
           <h2>Modify your information</h2>
           <h3>This will help other Introer users know how to intro you</h3>
           <form>
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Company"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="LinkedIn"
-              value={linkedin}
-              onChange={(e) => setLinkedin(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Your Intro"
-              value={intro}
-              onChange={(e) => setIntro(e.target.value)}
-            />
+            <div className="grid-cols-2 gap-4">
+              <div className="mb-8">
+                <h4>Name:</h4>
+                <input
+                  className="w-2/3"
+                  type="text"
+                  placeholder="Ex: George Burdell"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div className="mb-8">
+                <h4>Title:</h4>
+                <input
+                  className="w-2/3"
+                  type="text"
+                  placeholder="Ex: Marketing Manager at Amazon"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+              <div className="mb-8">
+                <h4>Company:</h4>
+                <input
+                  className="w-2/3"
+                  type="text"
+                  placeholder="Ex: Amazon"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                />
+              </div>
+              <div className="mb-8">
+                <h4>LinkedIn:</h4>
+                <input
+                  className="w-2/3"
+                  type="text"
+                  placeholder="Ex: https://www.linkedin.com/in/george-burdell/"
+                  value={linkedin}
+                  onChange={(e) => setLinkedin(e.target.value)}
+                />
+              </div>
+              <div className="mb-8">
+                <h4>Intro:</h4>
+                <input
+                  className="w-2/3"
+                  type="text"
+                  placeholder="Ex: George Burdell is a marketing manager at Amazon, working with the Alexa team to build the future of voice computing."
+                  value={intro}
+                  onChange={(e) => setIntro(e.target.value)}
+                />
+              </div>
+            </div>
             <button
               onClick={async (e) => {
                 const updatedUser: Partial<User> = {};
@@ -145,7 +169,6 @@ const Options: React.FC = () => {
             </button>
           </form>
         </div>
-        <button onClick={signOut}>Sign Out?</button>
       </div>
     );
 

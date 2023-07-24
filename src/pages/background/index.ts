@@ -53,7 +53,6 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
     const dbQuery = await Promise.resolve(dbSearch);
 
     if (dbQuery[0] === null || dbQuery[1] === null) {
-      console.log("scraping");
       const scrapingQuery = await Promise.resolve(res);
       if (dbQuery[0] === null && dbQuery[1] === null) {
         results = [scrapingQuery[0], scrapingQuery[1]];

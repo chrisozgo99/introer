@@ -3,7 +3,15 @@ import { UserTypes } from "@src/types/user";
 export function generateSentence(user: UserTypes) {
   // User has written their own intro
   if ("intro" in user) {
-    return user.intro;
+    const intro: string = user.intro;
+    if (intro.includes(user.name) && user.linkedInUrl) {
+      return intro.replace(
+        user.name,
+        `<a href="${user.linkedInUrl}" target="_blank">${user.name}</a>`
+      );
+    } else {
+      return intro;
+    }
     // User has not written their own intro, but data is not coming from LinkedIn
   } else if ("email" in user) {
     return `${
@@ -26,14 +34,6 @@ export function generateEmailHTML(
   secondUser: UserTypes,
   name: string
 ) {
-  //   if (type === "name") {
-  //     firstUser = results[0].data[0];
-  //     secondUser = results[1].data[0];
-  //   } else if (type === "url") {
-  //     firstUser = results[0].data;
-  //     secondUser = results[1].data;
-  //   }
-
   const sentence1 = `${secondUser.name.split(" ")[0]} – ${generateSentence(
     firstUser
   )}`;
@@ -43,8 +43,22 @@ export function generateEmailHTML(
 
   // Upon receiving the result, render the result in the div nested inside the div with class editable
   const composeWindow = document.querySelector(".editable");
+  const signature = composeWindow?.querySelector(
+    'div[data-smartmail="gmail_signature"]'
+  );
+
+  const signaturePrefix = composeWindow?.querySelector(
+    'span[class="gmail_signature_prefix"]'
+  );
+
+  const signatureClone = signature ? signature.cloneNode(true) : null;
+  const signaturePrefixClone = signaturePrefix
+    ? signaturePrefix.cloneNode(true)
+    : null;
+
   if (composeWindow instanceof HTMLElement) {
-    const innerHTML = composeWindow.innerHTML;
+    composeWindow.innerHTML = "";
+
     const prependHTML = `
             <div>
               Hi ${firstUser.name.split(" ")[0]} and ${
@@ -84,10 +98,18 @@ export function generateEmailHTML(
             <div>
               ${name.split(" ")[0]}
             </div>
+            <div>
+              <br />
+            </div>
           `;
-    composeWindow.innerHTML = prependHTML + innerHTML;
+    composeWindow.innerHTML = prependHTML;
+    if (signaturePrefixClone) {
+      composeWindow.appendChild(signaturePrefixClone);
+    }
+    if (signatureClone) {
+      composeWindow.appendChild(signatureClone);
+    }
 
-    // Add subject line
     const subjectLine = document.querySelector(".aoD.az6 input");
     if (subjectLine instanceof HTMLInputElement) {
       subjectLine.value = `Connecting ${firstUser.name} & ${secondUser.name}`;
