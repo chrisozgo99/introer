@@ -17,6 +17,7 @@ refreshOnUpdate("pages/content");
 let store: Store<RootState>;
 
 function addIconToComposeWindow() {
+  // console.log("addIconToComposeWindow");
   let tdAdded = false;
 
   const config = { childList: true, subtree: true };
@@ -26,33 +27,65 @@ function addIconToComposeWindow() {
     for (const mutation of mutationsList) {
       if (mutation.type === "childList" && !tdAdded) {
         // A child node has been added or removed. Check if the 'btC' element has been added.
-        const targetNode = document.querySelector(".btC");
-        if (targetNode instanceof Node) {
-          // Create a new <td> element
-          const newTd = document.createElement("td");
-          newTd.className = "introer-button-td m-0";
+        // const targetNode = document.querySelector(".btC");
+        const targetNodes = document.querySelectorAll(".btC");
+        targetNodes.forEach((node, index) => {
+          if (node instanceof Node && !node.querySelector(".introer-icon")) {
+            // Create a new <td> element
+            const newTd = document.createElement("td");
+            newTd.className = "introer-button-td m-0";
 
-          const introerIconUrl = chrome.runtime.getURL("introer_logo.png");
+            newTd.id = `introer-button-td-${index}`;
 
-          const img = document.createElement("img");
+            const introerIconUrl = chrome.runtime.getURL("introer_logo.png");
 
-          img.src = introerIconUrl;
-          img.className = "introer-icon";
-          img.alt = "Introer";
+            const img = document.createElement("img");
 
-          // If there is no icon, we want to ReactDOM.render the icon, else we don't want to render it
-          if (!targetNode.querySelector(".introer-icon")) {
+            img.src = introerIconUrl;
+            img.className = "introer-icon";
+            img.alt = "Introer";
+
+            // console.log("Rendering icon");
+            // If there is no icon, we want to ReactDOM.render the icon, else we don't want to render it
             ReactDOM.render(<Icon introerIconUrl={introerIconUrl} />, newTd);
+
+            // Append the new <td> element to the target node
+            node.insertBefore(newTd, node.children[1]);
           }
+        });
 
-          // Append the new <td> element to the target node
-          targetNode.insertBefore(newTd, targetNode.children[1]);
+        tdAdded = true;
 
-          tdAdded = true;
+        // Once we've found the target node and added the new <td> element, we can stop observing
+        observer.disconnect();
 
-          // Once we've found the target node and added the new <td> element, we can stop observing
-          observer.disconnect();
-        }
+        // if (targetNode instanceof Node) {
+        //   // Create a new <td> element
+        //   const newTd = document.createElement("td");
+        //   newTd.className = "introer-button-td m-0";
+
+        //   const introerIconUrl = chrome.runtime.getURL("introer_logo.png");
+
+        //   const img = document.createElement("img");
+
+        //   img.src = introerIconUrl;
+        //   img.className = "introer-icon";
+        //   img.alt = "Introer";
+
+        //   // If there is no icon, we want to ReactDOM.render the icon, else we don't want to render it
+        //   if (!targetNode.querySelector(".introer-icon")) {
+        //     console.log("Rendering icon");
+        //     ReactDOM.render(<Icon introerIconUrl={introerIconUrl} />, newTd);
+        //   }
+
+        //   // Append the new <td> element to the target node
+        //   targetNode.insertBefore(newTd, targetNode.children[1]);
+
+        //   tdAdded = true;
+
+        //   // Once we've found the target node and added the new <td> element, we can stop observing
+        //   observer.disconnect();
+        // }
       }
     }
   };
@@ -79,7 +112,14 @@ const render = async () => {
   const initializeStore = async () => {
     const createReduxStore = async (preloadedState?: StatusState) => {
       const account = await chrome.storage.local.get().then((oldState) => {
-        return oldState.reduxed[2].account as RootState["account"];
+        if (oldState.reduxed && oldState.reduxed[2]) {
+          return oldState.reduxed[2].account as RootState["account"];
+        } else {
+          return {
+            user: null,
+            token: null,
+          };
+        }
       });
 
       await chrome.storage.local.clear();
@@ -113,8 +153,12 @@ const render = async () => {
   document.addEventListener("click", function (event) {
     const targetElement = event.target as HTMLElement;
 
-    const element = document.querySelector(".introer-button-td");
-    const rect = element.getBoundingClientRect();
+    const element = document.querySelectorAll(".introer-button-td");
+
+    // Get the correct element from the NodeList
+    const rect = element[0].getBoundingClientRect();
+
+    // const rect = element.getBoundingClientRect();
     if (!targetElement.classList.value.includes("introer-no-close")) {
       if (
         // Check if the clicked element is the div or a descendant of the div
@@ -151,7 +195,10 @@ const render = async () => {
         );
       }
     }
-    if (store.getState().status.status === "makeIntro") {
+    if (!store.getState().account.user) {
+      info.style.top = `${rect.top - 110}px`;
+      info.style.left = `${rect.left - 45}px`;
+    } else if (store.getState().status.status === "makeIntro") {
       info.style.top = `${rect.top - 60}px`;
       info.style.left = `${rect.left - 45}px`;
     } else if (store.getState().status.status === "choosePeople") {
@@ -180,12 +227,13 @@ const render = async () => {
   if (composeButton instanceof Node) {
     // If it exists, add a click event listener to it
     composeButton.addEventListener("click", function () {
+      // console.log("compose button event listener added");
       addIconToComposeWindow();
     });
 
     try {
       chrome.runtime.onMessage.addListener((request) => {
-        console.log(request.results);
+        // console.log(request.results);
         if (request.action === "searchIntrosResult" && request.search) {
           store.dispatch(
             statusUpdate({
