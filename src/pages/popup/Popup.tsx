@@ -8,13 +8,23 @@ const Popup = () => {
       <header className="App-header">
         <h1 className="App-title">INTROER</h1>
         <img src={logo} className="App-logo" alt="logo" />
+        <div className="mb-4">
+          <a
+            className="App-link"
+            href="chrome-extension://jjjhhhikdembmidfggagefoiecdogfoj/src/pages/options/index.html"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Settings
+          </a>
+        </div>
         <a
           className="App-link"
-          href="chrome-extension://ihmoleioejjjdbdmnbngkbanlgoodbcl/src/pages/options/index.html"
+          href="https://forms.gle/aJBtDQiXvBfJaJHk9"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Settings
+          Provide Feedback
         </a>
       </header>
     </div>

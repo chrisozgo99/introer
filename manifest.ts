@@ -45,13 +45,13 @@ const manifest: chrome.runtime.ManifestV3 = {
       matches: ["*://*/*"],
     },
   ],
-  permissions: ["cookies", "storage", "identity"],
+  permissions: ["storage", "identity"],
   oauth2: {
     client_id:
       "523499253505-1v0h4tv3qsi37b6fkkm1e4fdjj8pu3k3.apps.googleusercontent.com",
     scopes: ["https://www.googleapis.com/auth/userinfo.email"],
   },
-  key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhpuMpmc2c89KK53ew2qjPxHoUBv6NmdWbTeLLOeocd2YmCbTzsr3Wpol5BvWngWp2Z8uYmFMyCATS6k1o8T2pv/m3n8g6rvGyOXyH5FfJwZTsYXaWmDil3JP0Mp7nmGAmv5zC4RkvQd3J/K1Owt3v0zbqPj8HzwR5cAumGXao2IJlEW0fhDIQ30W5jEYe1TlE7bSRQH0ZizuNlzHquDSU4jPrqYgr8FNGPZ9JI+rppQNSvcVMciYSA/EZF/4vw8fbzCWVkcscEF/U6/QAGEOYDPTr7lpG3EwSFIcjrQDrPTKP4yTdOS5UwsyQVkBykBCz/Sq3guT218JiyazypD1LwIDAQAB",
+  key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArDc5mFl+PhA2YzYgaRMwDecelDyrW+EWsI8QlhPezg1IT0JY5ApMJtX9poPrvcQcfOS+tOPfKb4GtPuz75thuCtKuOdBCIWduqwfaj7lqvsSXLPVFAaFjoNDgKy3ULgadxpzuv5o8BbmwvckJAN4I2eeVDtertYL7wk4kCY/zZ+Moq2pv9OvD2u9NuADsT1coskuksk4EQUNjaeNmyjKaU76gznlCm4Sg+o196m7nGatIPykcRwZZr1yOzHax4GJdtL6B5UaGjLWyhLJgRgW5dCYSW6U5Dd+tZZIjsuNVJi2AK6nJWaq5WbI5Qb3C6/kPFOM22/9rGZWIbxGwraHNQIDAQAB",
 };
 
 export default manifest;

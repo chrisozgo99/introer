@@ -46,7 +46,7 @@ export default function ReviewPeople(props: ReviewPeopleProps) {
           />
         </div>
         <div>
-          <div className="text-xs">{user.name}</div>
+          <div className="text-xs">{user?.name}</div>
           <div className="text-xs">{user.title}</div>
         </div>
       </div>
@@ -93,15 +93,15 @@ export default function ReviewPeople(props: ReviewPeopleProps) {
           <div className="w-1/2 text-center">
             {`${
               Array.isArray(query1Results)
-                ? query1Results[0].name
-                : query1Results.name
+                ? query1Results[0]?.name
+                : query1Results?.name
             }`}
           </div>
           <div className="w-1/2 text-center">
             {`${
               Array.isArray(query2Results)
-                ? query2Results[0].name
-                : query2Results.name
+                ? query2Results[0]?.name
+                : query2Results?.name
             }`}
           </div>
         </div>
@@ -129,7 +129,9 @@ export default function ReviewPeople(props: ReviewPeopleProps) {
                     Array.isArray(query2Results)
                       ? query2Results[query2SelectedInt || 0]
                       : query2Results,
-                    store.getState().account.user.name
+                    store.getState().account.user?.name
+                      ? store.getState().account.user.name
+                      : ""
                   );
                   dispatch(
                     statusUpdate({

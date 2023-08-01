@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, FC } from "react";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth } from "../background";
 import { accountAuth, accountLogout, accountProfile } from "@src/state/actions";
@@ -7,7 +7,7 @@ import { getUser, setUser } from "@src/utils/firebase/firestore/users";
 import { User } from "@src/types/user";
 import { RootState } from "@src/state/reducers";
 
-const Options: React.FC = () => {
+const Options: FC = () => {
   const dispatch = useDispatch();
   const user: User = useSelector(
     (state: RootState) => state.account.user as User
@@ -18,15 +18,8 @@ const Options: React.FC = () => {
   const [company, setCompany] = useState(user?.company || "");
   const [linkedin, setLinkedin] = useState(user?.linkedInUrl || "");
   const [intro, setIntro] = useState(user?.intro || "");
-
-  useEffect(() => {
-    if (!user) return;
-    setName(user?.name);
-    setTitle(user?.title);
-    setCompany(user?.company);
-    setLinkedin(user?.linkedInUrl);
-    setIntro(user?.intro);
-  }, [user]);
+  const [saving, setSaving] = useState(false);
+  const [authState, setAuthState] = useState(null);
 
   const signIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
@@ -71,6 +64,7 @@ const Options: React.FC = () => {
 
   useEffect(() => {
     auth.onAuthStateChanged(async (authState) => {
+      setAuthState(authState);
       if (authState == null) return;
       const val = await getUser(authState);
       dispatch(
@@ -82,12 +76,33 @@ const Options: React.FC = () => {
     });
   }, []);
 
-  if (undefined === user) return <h1>Loading...</h1>;
+  useEffect(() => {
+    if (!user && !authState) {
+      return;
+    } else if (!user && authState) {
+      // Weird state management issue with jank fix
+      getUser(authState).then((val) => {
+        dispatch(
+          accountProfile({
+            type: "ACCOUNT_PROFILE",
+            user: val,
+          })
+        );
+      });
+    }
+    setName(user?.name);
+    setTitle(user?.title);
+    setCompany(user?.company);
+    setLinkedin(user?.linkedInUrl);
+    setIntro(user?.intro);
+  }, [user]);
 
-  if (user != null)
+  if (user === undefined) return <h1>Loading...</h1>;
+
+  if (authState != null)
     return (
       <div className="w-full">
-        <h1 className="text-center">Signed in as {user.name}</h1>
+        <h1 className="text-center">Signed in as {authState.email}</h1>
         <div className="flex justify-center">
           <button onClick={signOut}>Sign Out</button>
         </div>
@@ -150,6 +165,7 @@ const Options: React.FC = () => {
             </div>
             <button
               onClick={async (e) => {
+                setSaving(true);
                 const updatedUser: Partial<User> = {};
                 if (name && name !== user.name) updatedUser["name"] = name;
                 if (title && title !== user.title) updatedUser["title"] = title;
@@ -162,10 +178,22 @@ const Options: React.FC = () => {
                 await setUser(user.id, {
                   ...user,
                   ...updatedUser,
+                }).then(() => {
+                  dispatch(
+                    accountProfile({
+                      type: "ACCOUNT_PROFILE",
+                      user: {
+                        ...user,
+                        ...updatedUser,
+                      },
+                    })
+                  );
+                  alert("Changes saved successfully!");
+                  setSaving(false);
                 });
               }}
             >
-              Save
+              {saving ? "Saving..." : "Save"}
             </button>
           </form>
         </div>
