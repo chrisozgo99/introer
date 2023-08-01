@@ -79,7 +79,16 @@ const render = async () => {
   const initializeStore = async () => {
     const createReduxStore = async (preloadedState?: StatusState) => {
       const account = await chrome.storage.local.get().then((oldState) => {
-        return oldState.reduxed[2].account as RootState["account"];
+        if (
+          !oldState ||
+          !oldState.reduxed ||
+          !oldState.reduxed[2] ||
+          !oldState.reduxed[2].account
+        ) {
+          return;
+        } else {
+          return oldState.reduxed[2].account as RootState["account"];
+        }
       });
 
       await chrome.storage.local.clear();
@@ -151,6 +160,7 @@ const render = async () => {
         );
       }
     }
+
     if (store.getState().status.status === "makeIntro") {
       info.style.top = `${rect.top - 60}px`;
       info.style.left = `${rect.left - 45}px`;
@@ -185,7 +195,6 @@ const render = async () => {
 
     try {
       chrome.runtime.onMessage.addListener((request) => {
-        console.log(request.results);
         if (request.action === "searchIntrosResult" && request.search) {
           store.dispatch(
             statusUpdate({

@@ -28,8 +28,6 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
   } else if (request.action === "searchIntros") {
     tabIds.set(request, sender.tab.id);
 
-    console.log(request);
-
     let results: [UserSearchResult, UserSearchResult] = [null, null];
 
     const dbSearch: Promise<[User[] | null, User[] | null]> = handleSearch(
@@ -64,8 +62,6 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
     } else {
       results = [dbQuery[0], dbQuery[1]];
     }
-
-    console.log(results);
 
     const tabId = tabIds.get(request);
 

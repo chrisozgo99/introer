@@ -162,23 +162,27 @@ export default function EnterNames() {
             className="introer-popup-body-content-input-button introer-no-close"
             type="button"
             onClick={() => {
-              setLoading(!loading);
-              chrome.runtime.sendMessage({
-                action: "searchIntros",
-                values: url
-                  ? [value1, value2]
-                  : [
-                      {
-                        name: value1,
-                        company: company1,
-                      },
-                      {
-                        name: value2,
-                        company: company2,
-                      },
-                    ],
-                type: url ? "url" : "name",
-              });
+              if (value1 && value2) {
+                setLoading(!loading);
+                chrome.runtime.sendMessage({
+                  action: "searchIntros",
+                  values: url
+                    ? [value1, value2]
+                    : [
+                        {
+                          name: value1,
+                          company: company1,
+                        },
+                        {
+                          name: value2,
+                          company: company2,
+                        },
+                      ],
+                  type: url ? "url" : "name",
+                });
+              } else {
+                alert("Please enter two names");
+              }
             }}
           >
             <span

@@ -30,7 +30,7 @@ async function getUser(user) {
       const data: User = {
         id: user.uid,
         email: user.email,
-        name: user.displayName,
+        name: user.displayName || "",
         profilePhoto: user.photoURL,
       };
 

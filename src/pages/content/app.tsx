@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import EnterNames from "./components/enter-names";
-import LogIn from "./components/log-in";
+// import LogIn from "./components/log-in";
 import { MakeIntro } from "./components/make-intro";
 import { connect } from "react-redux";
 import { RootState } from "@src/state/reducers";
@@ -9,8 +9,8 @@ import ReviewPeople from "./components/review-people";
 function App(props: RootState) {
   const [component, setComponent] = useState<JSX.Element>(<MakeIntro />);
 
-  const { account, status } = props;
-  const { user } = account;
+  const { status } = props;
+  // const { user } = account;
 
   useEffect(() => {
     if (status.status === "makeIntro") {
@@ -27,13 +27,15 @@ function App(props: RootState) {
     }
   }, [status.status]);
 
-  if (!user) {
-    return (
-      <div className={`${status.hidden ? "hidden" : "block"}`}>
-        <LogIn />
-      </div>
-    );
-  }
+  // if (!user) {
+  //   console.log("recheck and re-render");
+
+  //   return (
+  //     <div className={`${status.hidden ? "hidden" : "block"}`}>
+  //       <LogIn />
+  //     </div>
+  //   );
+  // }
 
   if (status.loading === true) {
     return <div>Loading...</div>;

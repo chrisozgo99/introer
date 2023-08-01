@@ -95,8 +95,10 @@ export function generateEmailHTML(
             <div>
               Best,
             </div>
-            <div>
-              ${name.split(" ")[0]}
+            <div ${
+              !name || !name.split(" ")[0] ? `style="color: #E15A32"` : ""
+            }>
+              ${name && name.split(" ")[0] ? name.split(" ")[0] : "[Your Name]"}
             </div>
             <div>
               <br />
